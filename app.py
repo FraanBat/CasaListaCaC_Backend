@@ -79,6 +79,7 @@ with app.app_context():
     db.create_all()
 
     '''
+    #Agregar profesiones la primera vez
     profesiones = ["Electicista", "Gasista", "Plomero", "Carpintero", "Jardinero", "Cerrajero", "Aire acondicionado", "Pintor", "Albañil", "Fletero"]
 
     for agregar_profesion in profesiones:
@@ -141,13 +142,16 @@ def consulta_usuario(id):
 def usuario_existente():
     mail = request.args.get("mail")
     usuario_consulta = Usuarios.query.filter_by(mail=mail).first()
-    print(usuario_consulta)
 
     if usuario_consulta is None:
         return jsonify({'existe': False}), 200
     else:
         return jsonify({'existe': True}), 200
 
+
+@app.route("/loginUsuario", methods=['POST'])
+def login_usario():
+    pass
 
 if __name__ == "__main__":
     app.run(debug=True)
