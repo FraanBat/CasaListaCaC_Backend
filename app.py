@@ -125,9 +125,13 @@ def alta_usuario():
 def consulta_usuario(id):
     usuario_consulta = Usuarios.query.get(id)
 
-    print(usuario_consulta)
+    usuario_profesion = None
+
+    if usuario_consulta.profesion_id is not None:
+        usuario_profesion = usuario_consulta.profesion.profesion
     
     return jsonify({
+        'id': usuario_consulta.id,
         'nombre': usuario_consulta.nombre,
         'apellido': usuario_consulta.apellido,
         'mail': usuario_consulta.mail,
@@ -135,7 +139,8 @@ def consulta_usuario(id):
         'telefono': usuario_consulta.telefono,
         'genero': usuario_consulta.genero,
         'imagen': usuario_consulta.imagen,
-        'profesion_id': usuario_consulta.profesion_id
+        'contrasena': usuario_consulta.contrasena,
+        'profesion': usuario_profesion
     }), 200
 
 @app.route("/correoExistente", methods=['GET'])
@@ -150,8 +155,58 @@ def usuario_existente():
 
 
 @app.route("/loginUsuario", methods=['POST'])
-def login_usario():
-    pass
+def login_usuario():
+    data = request.get_json()
+
+    mail = data["mail"]
+    contrasena = data["contrasena"]
+
+    usuario = Usuarios.query.filter_by(mail=mail).first()
+
+    if not usuario or usuario.contrasena != contrasena:
+        return jsonify({'mensaje': 'usuario y/o contraseña no válidos'}), 401
+    
+    return jsonify({
+            'mensaje': 'inicio exitoso',
+            'id': usuario.id
+    }), 200
+
+
+@app.route('/actualizarPerfil/<id>', methods=['PUT'])
+def update(id):
+    usuario = Usuarios.query.get(id)
+
+    mail = request.json["mail"]
+    nombre = request.json["nombre"]   
+    apellido = request.json["apellido"]
+    zona = request.json["zona"]
+    genero = request.json["genero"]
+    telefono = request.json["telefono"]
+    imagen = request.json["imagen"]
+    contrasena = request.json["contrasena"]
+    
+    profesion_nombre = request.json["profesion"]
+
+    if profesion_nombre is not None:
+        profesion = Profesion.query.filter_by(profesion=profesion_nombre).first()
+        usuario.profesion_id = profesion.id
+    else:
+        usuario.profesion_id = None
+    
+    usuario.mail = mail
+    usuario.nombre = nombre
+    usuario.apellido = apellido
+    usuario.zona = zona
+    usuario.genero = genero
+    usuario.telefono = telefono
+    usuario.imagen = imagen
+    usuario.contrasena = contrasena
+
+    db.session.commit()
+
+    return jsonify({
+            'mensaje': 'Datos actualizados correctamente'
+    }), 200
 
 if __name__ == "__main__":
     app.run(debug=True)
