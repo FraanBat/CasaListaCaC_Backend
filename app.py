@@ -34,6 +34,7 @@ class Usuarios(db.Model):
     imagen = db.Column(db.String(1000), nullable=False)
     profesion_id = db.Column(db.Integer, db.ForeignKey('profesion.id'))
     valoracion_media_profesional = db.Column(db.Numeric(precision=3, scale=2))
+    descripcion_profesional = db.Column(db.String(1000))
 
     #Relaciones
     pedidos_realizados = db.relationship('Pedidos', foreign_keys='Pedidos.cliente_id', backref='cliente', lazy=True)
@@ -140,7 +141,8 @@ def consulta_usuario(id):
         'genero': usuario_consulta.genero,
         'imagen': usuario_consulta.imagen,
         'contrasena': usuario_consulta.contrasena,
-        'profesion': usuario_profesion
+        'profesion': usuario_profesion,
+        'descripcion_profesion': usuario_consulta.descripcion_profesional
     }), 200
 
 @app.route("/correoExistente", methods=['GET'])
@@ -187,11 +189,15 @@ def update(id):
     
     profesion_nombre = request.json["profesion"]
 
+    descripcion_profesional = request.json["descripcion"]
+
     if profesion_nombre is not None:
         profesion = Profesion.query.filter_by(profesion=profesion_nombre).first()
         usuario.profesion_id = profesion.id
+        usuario.descripcion_profesional = descripcion_profesional
     else:
         usuario.profesion_id = None
+        usuario.descripcion_profesional = None
     
     usuario.mail = mail
     usuario.nombre = nombre
@@ -207,6 +213,28 @@ def update(id):
     return jsonify({
             'mensaje': 'Datos actualizados correctamente'
     }), 200
+
+
+@app.route('/solicitarEspecialistas', methods=['GET'])
+def listado_especialistas():
+    especialistas = Usuarios.query.filter(Usuarios.profesion_id.isnot(None)).all()
+
+    listado_especialistas = []
+    
+    for especialista in especialistas:
+        profesion = Profesion.query.filter_by(id=especialista.profesion_id).first()
+        listado_especialistas.append({
+            'id': especialista.id,
+            'nombre': especialista.nombre,
+            'apellido': especialista.apellido,
+            'telefono': especialista.telefono,
+            'zona': especialista.zona,
+            'foto_perfil': especialista.imagen,
+            'profesion': profesion,
+            'descripcion': especialista.descripcion_profesional
+        })
+
+    return jsonify(listado_especialistas), 200
 
 if __name__ == "__main__":
     app.run(debug=True)
