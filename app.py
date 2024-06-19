@@ -215,24 +215,29 @@ def update(id):
     }), 200
 
 
-@app.route('/solicitarEspecialistas', methods=['GET'])
-def listado_especialistas():
+@app.route('/solicitarEspecialistas/<id>', methods=['GET'])
+def listado_especialistas(id):
     especialistas = Usuarios.query.filter(Usuarios.profesion_id.isnot(None)).all()
-
     listado_especialistas = []
     
     for especialista in especialistas:
-        profesion = Profesion.query.filter_by(id=especialista.profesion_id).first()
-        listado_especialistas.append({
-            'id': especialista.id,
-            'nombre': especialista.nombre,
-            'apellido': especialista.apellido,
-            'telefono': especialista.telefono,
-            'zona': especialista.zona,
-            'foto_perfil': especialista.imagen,
-            'profesion': profesion,
-            'descripcion': especialista.descripcion_profesional
-        })
+        if especialista.id != int(id):
+            profesion = Profesion.query.filter_by(id=especialista.profesion_id).first()
+            valoracion_media = especialista.valoracion_media_profesional
+            if valoracion_media is None:
+                valoracion_media = 0
+            
+            listado_especialistas.append({
+                'id': especialista.id,
+                'nombre': especialista.nombre,
+                'apellido': especialista.apellido,
+                'telefono': especialista.telefono,
+                'zona': especialista.zona,
+                'foto_perfil': especialista.imagen,
+                'profesion': profesion.profesion,
+                'descripcion': especialista.descripcion_profesional,
+                'valoracion': valoracion_media
+            })
 
     return jsonify(listado_especialistas), 200
 
