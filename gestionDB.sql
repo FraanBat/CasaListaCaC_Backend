@@ -12,6 +12,7 @@ INSERT INTO usuarios(nombre, apellido, mail, contrasena, zona, telefono, genero,
 USE casalista;
 SELECT * FROM usuarios;
 SELECT * FROM profesion;
+SELECT * FROM pedidos;
 
 INSERT INTO profesion(profesion) VALUES ("Electicista");
 INSERT INTO profesion(profesion) VALUES ("Gasista");
