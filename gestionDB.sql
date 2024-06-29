@@ -13,6 +13,7 @@ USE casalista;
 SELECT * FROM usuarios;
 SELECT * FROM profesion;
 SELECT * FROM pedidos;
+SELECT * FROM valoracion;
 
 INSERT INTO profesion(profesion) VALUES ("Electicista");
 INSERT INTO profesion(profesion) VALUES ("Gasista");
