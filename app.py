@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -87,14 +88,6 @@ with app.app_context():
         nueva_profesion = Profesion(profesion=agregar_profesion)
         db.session.add(nueva_profesion)
         db.session.commit()
-    '''
-    '''
-    data_serializada = []
-    
-    for profesion in Profesion.query.all():
-        data_serializada.append({"id":profesion.id, "profesion":profesion.profesion})
-
-    print(data_serializada)
     '''
 
 @app.route("/") 
@@ -240,6 +233,129 @@ def listado_especialistas(id):
             })
 
     return jsonify(listado_especialistas), 200
+
+
+@app.route("/altaPedido", methods=['POST'])
+def alta_pedido():
+    cliente_id = request.json["clienteId"]
+    profesional_id = request.json["profesionalId"]
+
+    nuevo_pedido = Pedidos(cliente_id=cliente_id, profesional_id=profesional_id)
+    db.session.add(nuevo_pedido)
+    db.session.commit()
+
+    return "Solicitud de alta recibida", 201
+
+
+@app.route('/solicitarPedidos/<id>', methods=['GET'])
+def listado_pedidos(id):
+    pedidos = Pedidos.query.filter_by(profesional_id=int(id)).all()
+    listado_pedidos = []
+
+    for pedido in pedidos:
+        if pedido.fecha_realizado is None:
+            cliente_pedido = Usuarios.query.get(pedido.cliente_id)
+            listado_pedidos.append({
+                "id": pedido.id,
+                "nombre": cliente_pedido.nombre,
+                "apellido": cliente_pedido.apellido,
+                "foto_perfil": cliente_pedido.imagen,
+                "telefono": cliente_pedido.telefono
+            })
+    
+    return jsonify(listado_pedidos), 200
+
+
+@app.route('/pedidoRealizado/<id>', methods=['PUT'])
+def pedido_realizado(id):
+    pedido = Pedidos.query.get(id)
+    pedido.fecha_realizado = datetime.now()
+    db.session.commit()
+
+    return "Trabajo realizado", 200
+
+@app.route('/solicitarHistorial/<id>', methods=['GET'])
+def listado_historial(id):
+    pedidos = Pedidos.query.filter_by(cliente_id=int(id)).all()
+
+    listado_historial = []
+
+    for pedido in pedidos:
+        if pedido.fecha_realizado is not None:
+            profesional_pedido = Usuarios.query.get(pedido.profesional_id)
+
+            fecha_pedido_realizado = f'{pedido.fecha_realizado.day}/{pedido.fecha_realizado.month}/{pedido.fecha_realizado.year}'
+
+            profesion = Profesion.query.filter_by(id=profesional_pedido.profesion_id).first().profesion
+            
+            listado_historial.append({
+                "id_pedido": pedido.id,
+                "nombre": profesional_pedido.nombre,
+                "apellido": profesional_pedido.apellido,
+                "foto_perfil": profesional_pedido.imagen,
+                "fecha_trabajo": fecha_pedido_realizado,
+                "profesion": profesion
+            })
+    
+    return jsonify(listado_historial), 200
+
+@app.route('/solicitarEspecialistaHistorial/<id>', methods=['GET'])
+def listado_historial_especialista(id):
+     pedido = Pedidos.query.get(id)
+     
+     profesional = Usuarios.query.get(pedido.profesional_id)
+     profesion = Profesion.query.filter_by(id=profesional.profesion_id).first().profesion
+
+     return jsonify({
+            'id_profesional': profesional.id,
+            'nombre': profesional.nombre,
+            'apellido': profesional.apellido,
+            'foto_perfil': profesional.imagen,
+            'profesion': profesion
+    }), 200
+
+
+@app.route("/nuevaValoracion", methods=['POST'])
+def nueva_valoracion_usuario():
+    amabilidad = int(request.json["amabilidad"])
+    puntualidad = int(request.json["puntualidad"])
+    proligidad = int(request.json["proligidad"])
+    confiabilidad = int(request.json["confiabilidad"])
+    comentarios = request.json["comentarios"]
+    cliente = request.json["cliente_id"]
+    profesional = request.json["profesional_id"]
+
+    nueva_valoracion = Valoracion(cliente_id=cliente, profesional_id=profesional, valoracion_media_individual=(amabilidad+puntualidad+proligidad+confiabilidad)/4, comentario=comentarios)
+
+    db.session.add(nueva_valoracion)
+    db.session.commit()
+
+    valoracion_media = 0
+
+    valoraciones = Valoracion.query.filter_by(profesional_id=profesional).all()
+
+    for valoracion in valoraciones:
+        valoracion_media += valoracion.valoracion_media_individual
+    
+    valoracion_media /= len(valoraciones)
+
+    profesional = Usuarios.query.get(profesional)
+    profesional.valoracion_media_profesional = valoracion_media
+    db.session.commit()
+
+    return "Trabajo evaluado", 200
+
+
+@app.route('/borrarPedidoHistorial/<id>', methods=['DELETE'])
+def borrar(id):
+    
+    pedido = Pedidos.query.get(id)
+
+    db.session.delete(pedido)
+    db.session.commit()
+
+    return "Pedido eliminado"
+
 
 if __name__ == "__main__":
     app.run(debug=True)
