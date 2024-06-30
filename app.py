@@ -80,15 +80,15 @@ class Valoracion(db.Model):
 with app.app_context():
     db.create_all()
 
-    '''
-    #Agregar profesiones la primera vez
-    profesiones = ["Electicista", "Gasista", "Plomero", "Carpintero", "Jardinero", "Cerrajero", "Aire acondicionado", "Pintor", "Albañil", "Fletero"]
+    listado_profesiones = Profesion.query.all()
 
-    for agregar_profesion in profesiones:
-        nueva_profesion = Profesion(profesion=agregar_profesion)
-        db.session.add(nueva_profesion)
-        db.session.commit()
-    '''
+    if len(listado_profesiones) == 0:
+        profesiones = ["Electicista", "Gasista", "Plomero", "Carpintero", "Jardinero", "Cerrajero", "Aire acondicionado", "Pintor", "Albañil", "Fletero"]
+
+        for agregar_profesion in profesiones:
+            nueva_profesion = Profesion(profesion=agregar_profesion)
+            db.session.add(nueva_profesion)
+            db.session.commit()
 
 @app.route("/") 
 def index():
@@ -356,6 +356,20 @@ def borrar(id):
 
     return "Pedido eliminado"
 
+@app.route('/solicitarEspecialistaComentarios/<id>', methods=['GET'])
+def listado_comentarios_especialista(id):
+    especialista_valoraciones = Valoracion.query.filter_by(profesional_id=int(id)).all()
+    
+    comentarios_especialista = []
+    
+    for especialista_valoracion in especialista_valoraciones:
+        cliente_comentario = Usuarios.query.get(especialista_valoracion.cliente_id)
+        comentarios_especialista.append({
+            'nombre_comentario': cliente_comentario.nombre + " " + cliente_comentario.apellido,
+            'comentario': especialista_valoracion.comentario
+        })
+    
+    return jsonify(comentarios_especialista), 200
 
 if __name__ == "__main__":
     app.run(debug=True)
