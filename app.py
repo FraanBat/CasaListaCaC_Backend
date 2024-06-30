@@ -346,5 +346,16 @@ def nueva_valoracion_usuario():
     return "Trabajo evaluado", 200
 
 
+@app.route('/borrarPedidoHistorial/<id>', methods=['DELETE'])
+def borrar(id):
+    
+    pedido = Pedidos.query.get(id)
+
+    db.session.delete(pedido)
+    db.session.commit()
+
+    return "Pedido eliminado"
+
+
 if __name__ == "__main__":
     app.run(debug=True)
