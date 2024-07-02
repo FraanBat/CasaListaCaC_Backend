@@ -7,7 +7,7 @@ app = Flask(__name__)
 
 CORS(app)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root:1234@localhost:3306/casalista'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://Fraanbat:codoacodo@Fraanbat.mysql.pythonanywhere-services.com/Fraanbat$default'
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -90,14 +90,14 @@ with app.app_context():
             db.session.add(nueva_profesion)
             db.session.commit()
 
-@app.route("/") 
+@app.route("/")
 def index():
     return f'App Web de CasaLista'
 
 
 @app.route("/altaUsuario", methods=['POST'])
 def alta_usuario():
-    
+
     nombre = request.json["nombre"]
     apellido = request.json["apellido"]
     mail = request.json["mail"]
@@ -123,7 +123,7 @@ def consulta_usuario(id):
 
     if usuario_consulta.profesion_id is not None:
         usuario_profesion = usuario_consulta.profesion.profesion
-    
+
     return jsonify({
         'id': usuario_consulta.id,
         'nombre': usuario_consulta.nombre,
@@ -160,7 +160,7 @@ def login_usuario():
 
     if not usuario or usuario.contrasena != contrasena:
         return jsonify({'mensaje': 'usuario y/o contraseña no válidos'}), 401
-    
+
     return jsonify({
             'mensaje': 'inicio exitoso',
             'id': usuario.id
@@ -172,14 +172,14 @@ def update(id):
     usuario = Usuarios.query.get(id)
 
     mail = request.json["mail"]
-    nombre = request.json["nombre"]   
+    nombre = request.json["nombre"]
     apellido = request.json["apellido"]
     zona = request.json["zona"]
     genero = request.json["genero"]
     telefono = request.json["telefono"]
     imagen = request.json["imagen"]
     contrasena = request.json["contrasena"]
-    
+
     profesion_nombre = request.json["profesion"]
 
     descripcion_profesional = request.json["descripcion"]
@@ -191,7 +191,7 @@ def update(id):
     else:
         usuario.profesion_id = None
         usuario.descripcion_profesional = None
-    
+
     usuario.mail = mail
     usuario.nombre = nombre
     usuario.apellido = apellido
@@ -212,14 +212,14 @@ def update(id):
 def listado_especialistas(id):
     especialistas = Usuarios.query.filter(Usuarios.profesion_id.isnot(None)).all()
     listado_especialistas = []
-    
+
     for especialista in especialistas:
         if especialista.id != int(id):
             profesion = Profesion.query.filter_by(id=especialista.profesion_id).first()
             valoracion_media = especialista.valoracion_media_profesional
             if valoracion_media is None:
                 valoracion_media = 0
-            
+
             listado_especialistas.append({
                 'id': especialista.id,
                 'nombre': especialista.nombre,
@@ -262,7 +262,7 @@ def listado_pedidos(id):
                 "foto_perfil": cliente_pedido.imagen,
                 "telefono": cliente_pedido.telefono
             })
-    
+
     return jsonify(listado_pedidos), 200
 
 
@@ -287,7 +287,7 @@ def listado_historial(id):
             fecha_pedido_realizado = f'{pedido.fecha_realizado.day}/{pedido.fecha_realizado.month}/{pedido.fecha_realizado.year}'
 
             profesion = Profesion.query.filter_by(id=profesional_pedido.profesion_id).first().profesion
-            
+
             listado_historial.append({
                 "id_pedido": pedido.id,
                 "nombre": profesional_pedido.nombre,
@@ -296,13 +296,13 @@ def listado_historial(id):
                 "fecha_trabajo": fecha_pedido_realizado,
                 "profesion": profesion
             })
-    
+
     return jsonify(listado_historial), 200
 
 @app.route('/solicitarEspecialistaHistorial/<id>', methods=['GET'])
 def listado_historial_especialista(id):
      pedido = Pedidos.query.get(id)
-     
+
      profesional = Usuarios.query.get(pedido.profesional_id)
      profesion = Profesion.query.filter_by(id=profesional.profesion_id).first().profesion
 
@@ -336,7 +336,7 @@ def nueva_valoracion_usuario():
 
     for valoracion in valoraciones:
         valoracion_media += valoracion.valoracion_media_individual
-    
+
     valoracion_media /= len(valoraciones)
 
     profesional = Usuarios.query.get(profesional)
@@ -348,7 +348,7 @@ def nueva_valoracion_usuario():
 
 @app.route('/borrarPedidoHistorial/<id>', methods=['DELETE'])
 def borrar(id):
-    
+
     pedido = Pedidos.query.get(id)
 
     db.session.delete(pedido)
@@ -359,17 +359,14 @@ def borrar(id):
 @app.route('/solicitarEspecialistaComentarios/<id>', methods=['GET'])
 def listado_comentarios_especialista(id):
     especialista_valoraciones = Valoracion.query.filter_by(profesional_id=int(id)).all()
-    
+
     comentarios_especialista = []
-    
+
     for especialista_valoracion in especialista_valoraciones:
         cliente_comentario = Usuarios.query.get(especialista_valoracion.cliente_id)
         comentarios_especialista.append({
             'nombre_comentario': cliente_comentario.nombre + " " + cliente_comentario.apellido,
             'comentario': especialista_valoracion.comentario
         })
-    
-    return jsonify(comentarios_especialista), 200
 
-if __name__ == "__main__":
-    app.run(debug=True)
+    return jsonify(comentarios_especialista), 200
