@@ -5,7 +5,7 @@ Casa Lista es una aplicación desarrollada por estudiantes del programa Codo a C
 El objetivo de Casa Lista es ayudarte a encontrar más fácil al profesional que necesitas para tu hogar 🏠, de acuerdo con tu zona y tus expectativas sobre la calidad del servicio brindado 👩‍🏭👷
 
 ## ¿De qué trata este repositorio?
-Este repositorio comprende la parte Backend de la aplicación realizada, la cual fue desarrollada utilizando Python 🐍 y Flask como framework.
+Este repositorio muestra la parte Backend de la aplicación realizada, la cual fue desarrollada utilizando Python 🐍 y Flask como framework. El código que se muestra en este repositorio está siendo ejecutado en <a href="https://fraanbat.pythonanywhere.com/" rel="nofollow noreferrer">pythonanywhere</a>
 
 Para el <a href="https://github.com/FraanBat/CasaListaCaC" rel="nofollow noreferrer">Frontend de la aplicación,</a> se utilizó HTML, CSS y JS.
 
