@@ -83,7 +83,7 @@ with app.app_context():
     listado_profesiones = Profesion.query.all()
 
     if len(listado_profesiones) == 0:
-        profesiones = ["Electicista", "Gasista", "Plomero", "Carpintero", "Jardinero", "Cerrajero", "Aire acondicionado", "Pintor", "Albañil", "Fletero"]
+        profesiones = ["Electricista", "Gasista", "Plomero", "Carpintero", "Jardinero", "Cerrajero", "Aire acondicionado", "Pintor", "Albañil", "Fletero"]
 
         for agregar_profesion in profesiones:
             nueva_profesion = Profesion(profesion=agregar_profesion)
