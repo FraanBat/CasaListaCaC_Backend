@@ -7,7 +7,7 @@ app = Flask(__name__)
 
 CORS(app)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://Fraanbat:codoacodo@Fraanbat.mysql.pythonanywhere-services.com/Fraanbat$default'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://FrancoRiggio:codoacodo@FrancoRiggio.mysql.pythonanywhere-services.com/FrancoRiggio$default'
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -92,7 +92,7 @@ with app.app_context():
 
 @app.route("/")
 def index():
-    return f'App Web de CasaLista'
+    return 'App Web de CasaLista'
 
 
 @app.route("/altaUsuario", methods=['POST'])
@@ -140,8 +140,8 @@ def consulta_usuario(id):
 
 @app.route("/correoExistente", methods=['GET'])
 def usuario_existente():
-    mail = request.args.get("mail")
-    usuario_consulta = Usuarios.query.filter_by(mail=mail).first()
+    mail_usuario = request.args.get("mail")
+    usuario_consulta = Usuarios.query.filter_by(mail=mail_usuario).first()
 
     if usuario_consulta is None:
         return jsonify({'existe': False}), 200
